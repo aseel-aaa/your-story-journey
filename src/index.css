@@ -2,93 +2,401 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ── Google Font ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* ── Design tokens ───────────────────────────────────────────────────────── */
 @layer base {
   :root {
     --background: 220 20% 97%;
     --foreground: 220 25% 10%;
-
     --card: 0 0% 100%;
     --card-foreground: 220 25% 10%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
-
     --primary: 250 60% 52%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 200 60% 94%;
     --secondary-foreground: 220 25% 10%;
-
     --muted: 220 15% 92%;
     --muted-foreground: 220 10% 46%;
-
     --accent: 340 65% 55%;
     --accent-foreground: 0 0% 100%;
-
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 220 15% 88%;
     --input: 220 15% 88%;
     --ring: 250 60% 52%;
-
     --radius: 0.75rem;
-
     --story-success: 145 60% 42%;
     --story-danger: 0 72% 51%;
     --story-warning: 38 92% 50%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 220 25% 10%;
-    --foreground: 220 15% 92%;
-    --card: 220 25% 14%;
-    --card-foreground: 220 15% 92%;
-    --popover: 220 25% 14%;
-    --popover-foreground: 220 15% 92%;
-    --primary: 250 60% 62%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 20%;
-    --secondary-foreground: 220 15% 92%;
-    --muted: 220 20% 18%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 340 65% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 250 60% 62%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   body {
+    font-family: 'Inter', system-ui, sans-serif;
     @apply bg-background text-foreground;
+    margin: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Card slides up and fades in when a new scene loads */
+@keyframes scene-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Subtle shimmer that sweeps across the progress bar */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* Soft pulse used on the progress fill when at 100% */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(167, 139, 250, 0.4); }
+  50%       { box-shadow: 0 0 18px 4px rgba(167, 139, 250, 0.7); }
+}
+
+/* Floating particles in the background overlay */
+@keyframes float-up {
+  0%   { transform: translateY(0)   scale(1);   opacity: 0.6; }
+  100% { transform: translateY(-80px) scale(0.5); opacity: 0; }
+}
+
+/* Choice button appears with a staggered slide */
+@keyframes choice-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STORY ROOT  – full-screen gradient background
+═══════════════════════════════════════════════════════════════════════════ */
+
+.story-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  /* background is set via inline style (CSS gradient from storyData) */
+  transition: background 0.9s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative radial glow overlay so scenes feel atmospheric */
+.story-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 70%, rgba(59, 130, 246, 0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTENT CONTAINER
+═══════════════════════════════════════════════════════════════════════════ */
+
+.story-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Header ── */
+.story-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.story-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.story-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  transition: color 0.2s ease;
+  font-family: inherit;
+}
+.story-link-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════════════════════════════════════ */
+
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.progress-track {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  /* Animated gradient shimmer */
+  background: linear-gradient(
+    90deg,
+    #7c3aed,
+    #a78bfa,
+    #c4b5fd,
+    #7c3aed
+  );
+  background-size: 200% auto;
+  animation: shimmer 2.5s linear infinite;
+  transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Glow when story is complete */
+.progress-fill[style*="width: 100%"] {
+  animation: shimmer 2.5s linear infinite, pulse-glow 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STORY CARD  – glassmorphism panel
+═══════════════════════════════════════════════════════════════════════════ */
+
+.story-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* Fade + slide transition controlled by React state */
+.story-card--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  animation: scene-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.story-card--hidden {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+/* ── Top row: emoji + ending badge ── */
+.scene-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scene-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  /* gentle float animation on load */
+  animation: scene-enter 0.5s ease both;
+}
+
+.ending-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Scene text ── */
+.scene-text {
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.75;
+  font-size: 1rem;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .scene-text {
+    font-size: 1.0625rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHOICE BUTTONS
+═══════════════════════════════════════════════════════════════════════════ */
+
+.choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.choice-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1.1rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  /* Staggered entrance animation */
+  animation: choice-in 0.35s ease both;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.18s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Stagger each button's entrance by 60 ms */
+.choice-btn:nth-child(1) { animation-delay: 0.05s; }
+.choice-btn:nth-child(2) { animation-delay: 0.12s; }
+.choice-btn:nth-child(3) { animation-delay: 0.19s; }
+
+.choice-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateX(5px);
+  box-shadow: 0 0 18px rgba(167, 139, 250, 0.2);
+}
+
+.choice-btn:active {
+  transform: translateX(3px) scale(0.99);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESTART BUTTON  (shown at endings)
+═══════════════════════════════════════════════════════════════════════════ */
+
+.restart-btn {
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  animation: scene-enter 0.4s 0.15s ease both;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.restart-btn:hover {
+  transform: scale(1.025);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.5);
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.restart-btn:active {
+  transform: scale(0.99);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BACK BUTTON
+═══════════════════════════════════════════════════════════════════════════ */
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: inherit;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+  animation: choice-in 0.3s ease both;
+}
+
+.back-btn:hover {
+  color: rgba(255, 255, 255, 0.75);
+  transform: translateX(-3px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCENE COUNTER
+═══════════════════════════════════════════════════════════════════════════ */
+
+.scene-counter {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.22);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE TWEAKS
+═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 640px) {
+  .story-card {
+    padding: 2.25rem 2.5rem;
+  }
+  .choice-btn {
+    font-size: 0.95rem;
   }
 }
